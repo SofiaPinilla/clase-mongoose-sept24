@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
-const PORT = 8080;
+require("dotenv").config()//para poder usar las variables de entorno
+const PORT = process.env.PORT || 3000;
 const { dbConnection } = require("./config/config")
 
 app.use(express.json())
