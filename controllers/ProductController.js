@@ -1,4 +1,5 @@
 const Product = require("../models/Product")
+const User = require("../models/User")
 
 const ProductController = {
     async create(req,res){
@@ -17,6 +18,7 @@ const ProductController = {
           // req.query.limit
           // console.log(page,limit)
            const products = await Product.find()
+           .populate("reviews.userId")
            .limit(limit)
            .skip((page - 1) * limit);
 
@@ -72,6 +74,39 @@ const ProductController = {
           res.send({ message: "product successfully updated", product });
         } catch (error) {
           console.error(error);
+        }
+      },
+      async insertComment(req, res) {
+        try {
+          const product = await Product.findByIdAndUpdate(
+            req.params._id,
+            { $push: { reviews: { comment:req.body.comment, userId: req.user._id } } },
+            { new: true }
+          );
+          res.send(product);
+        } catch (error) {
+          console.error(error);
+          res.status(500).send({ message: "There was a problem with your review" });
+        }
+      },    
+      async like(req, res) {
+        try {
+          //damos like al producto
+          const product = await Product.findByIdAndUpdate(
+            req.params._id,
+            { $push: { likes: req.user._id } },
+            { new: true }
+          );
+          // añadimos en la lista de deseos el producto al que hemos dado like
+          await User.findByIdAndUpdate(
+            req.user._id,
+            { $push: { wishList: req.params._id } },
+            { new: true }
+          );
+          res.send(product);
+        } catch (error) {
+          console.error(error);
+          res.status(500).send({ message: "There was a problem with your like" });
         }
       },
     
