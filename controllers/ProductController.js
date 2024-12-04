@@ -12,7 +12,14 @@ const ProductController = {
     },
     async getAll(req, res) {
         try {
+          const {page=1,limit=10} = req.query
+          // req.query.page
+          // req.query.limit
+          // console.log(page,limit)
            const products = await Product.find()
+           .limit(limit)
+           .skip((page - 1) * limit);
+
            res.send(products)
         } catch (error) {
             console.error(error);
